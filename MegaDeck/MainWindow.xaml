@@ -1,0 +1,15 @@
+﻿<Window x:Class="MegaDeck.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MegaDeck" Height="600" Width="1000">
+    <DockPanel>
+        <!-- Menú lateral -->
+        <StackPanel DockPanel.Dock="Left" Width="200" Background="#333">
+            <Button Content="Biblioteca" Click="GoToLibrary"/>
+            <Button Content="Preferencias" Click="GoToSettings"/>
+        </StackPanel>
+
+        <!-- Área de contenido dinámico -->
+        <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+    </DockPanel>
+</Window>

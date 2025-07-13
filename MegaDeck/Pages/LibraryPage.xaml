@@ -1,0 +1,14 @@
+<Page x:Class="MegaDeck.LibraryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="LibraryPage">
+
+    <Grid Background="Black">
+        <TextBlock Text="Biblioteca de juegos" 
+                   Foreground="White" 
+                   FontSize="24" 
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Margin="0,20,0,0"/>
+    </Grid>
+</Page>

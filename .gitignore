@@ -1,0 +1,51 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Auto-generated files
+*.generated.cs
+*.g.cs
+*.g.i.cs
+
+# VS Code directories
+.vscode/
+
+# Visual Studio working folder
+.vs/
+
+# NuGet packages
+*.nupkg
+# Uncomment if using package restore
+#packages/
+
+# Others
+_ReSharper*/
+*.DotSettings.user
+
+# Temporary files
+*.tmp
+*.bak
+*.old
+*.log
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Rider
+.idea/
+
+# JetBrains Rider and ReSharper caches
+*.sln.iml
+
+# Publish
+publish/
+
+# Crash dumps
+*.dmp
