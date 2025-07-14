@@ -9,7 +9,7 @@ namespace MegaDeck
         public MainWindow()
         {
             InitializeComponent();
-            MainFrame.Navigate(_libraryPage); // Página principal
+            MainFrame.Navigate(_libraryPage); 
         }
 
         private void GoToLibrary(object sender, RoutedEventArgs e)
@@ -19,7 +19,7 @@ namespace MegaDeck
 
         private void GoToSettings(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(new SettingsPage()); // crea tu SettingsPage.xaml
+            MainFrame.Navigate(new SettingsPage()); 
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)

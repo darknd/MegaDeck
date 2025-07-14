@@ -6,8 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using HtmlAgilityPack;
-
 
 namespace MegaDeck
 {
@@ -77,7 +75,7 @@ namespace MegaDeck
 
         private void LaunchGame(string cueFilePath)
         {
-            string fusionPath = @"C:\Users\fjafo\Documents\SynologyDrive\MegaDeck\MegaDeck\engine\Fusion.exe";
+            string fusionPath = @".\engine\Fusion.exe";
 
             if (!File.Exists(fusionPath))
             {
@@ -115,7 +113,7 @@ namespace MegaDeck
 
         private async void LoadRoms()
         {
-            string romFolder = @"C:\roms";
+            string romFolder = @"c:\roms";
 
             if (!Directory.Exists(romFolder))
                 Directory.CreateDirectory(romFolder);
