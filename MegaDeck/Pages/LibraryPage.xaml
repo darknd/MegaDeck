@@ -2,13 +2,38 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="LibraryPage">
+    
+    <ScrollViewer>
+        <ItemsControl x:Name="RomList" Margin="10">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel IsItemsHost="True"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
 
-    <Grid Background="Black">
-        <TextBlock Text="Biblioteca de juegos" 
-                   Foreground="White" 
-                   FontSize="24" 
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   Margin="0,20,0,0"/>
-    </Grid>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="8"
+                            CornerRadius="5"
+                            BorderThickness="2"
+                            BorderBrush="Transparent"
+                            Background="#222"
+                            Tag="{Binding CuePath}"
+                            MouseEnter="OnMouseEnterGame"
+                            MouseLeave="OnMouseLeaveGame"
+                            MouseLeftButtonDown="OnGameClick">
+                        <StackPanel Width="150">
+                            <Image Source="{Binding CoverUrl}" Height="200" Stretch="UniformToFill"/>
+                            <TextBlock Text="{Binding Title}"
+                                       FontSize="14"
+                                       Foreground="White"
+                                       TextAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Margin="5"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
 </Page>
