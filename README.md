@@ -1,10 +1,15 @@
-# MegaDeck
+# 🎮 MegaDeck
+
+MegaDeck is a modern ROM launcher inspired by DuckStation, made for managing and launching MegaCD/Sega CD games via RetroArch.
 
 ![Screenshot](MegaDeck/engine/megadeck_ui.png)
 
-Playground layout for MegaCD/SegaCD using RetroArch 
+## 📥 Download
 
-## 📥 Downloads
+👉 [Download the latest release](https://github.com/darknd/MegaDeck/releases/latest)
 
-You can download the latest version of MegaDeck from the [releases page](https://github.com/darknd/MegaDeck/releases).
+## 💾 Features
 
+- Custom cover support
+- ROM folder browser
+- RetroArch integration
