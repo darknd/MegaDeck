@@ -6,10 +6,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>megadeck.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <!-- 🔽 Copia automática de la carpeta engine -->
+  <!-- 🔽 Copia automática de las carpetas engine y roms -->
   <ItemGroup>
     <None Include=".\engine\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -18,6 +19,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  
+
+  <!-- 🔽 Referencia explícita a Windows Forms -->
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
 
 </Project>

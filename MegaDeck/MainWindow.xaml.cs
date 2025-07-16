@@ -6,7 +6,7 @@ namespace MegaDeck
     {
         private LibraryPage _libraryPage = new LibraryPage();
 
-        public MainWindow()
+         public MainWindow()
         {
             InitializeComponent();
             MainFrame.Navigate(_libraryPage); 
@@ -14,6 +14,7 @@ namespace MegaDeck
 
         private void GoToLibrary(object sender, RoutedEventArgs e)
         {
+            _libraryPage.Refresh(); 
             MainFrame.Navigate(_libraryPage);
         }
 
@@ -24,7 +25,7 @@ namespace MegaDeck
 
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
         }
     }
 

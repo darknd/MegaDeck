@@ -1,7 +1,7 @@
 ﻿<Window x:Class="MegaDeck.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MegaDeck - DaRKND 2025 - Version 0.1" Height="600" Width="1000">
+        Title="MegaDeck - DaRKND 2025 - Version 0.2" Height="600" Width="1000">
     <DockPanel>
 
         <!-- Menú superior -->
@@ -10,9 +10,13 @@
                 <MenuItem Header="Exit" Click="Exit_Click"/>
             </MenuItem>
             <MenuItem Header="_Settings">
-                <MenuItem Header="Fusion Options" Click="GoToSettings"/>
+                <MenuItem Header="Roms folder" Click="GoToSettings"/>
+            </MenuItem>
+            <MenuItem Header="_Library">
+                <MenuItem Header="Go to Library" Click="GoToLibrary"/>
             </MenuItem>
         </Menu>
+
 
         <!-- Área de contenido dinámico -->
         <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>

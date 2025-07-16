@@ -6,6 +6,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Collections.Generic;
+using MessageBox = System.Windows.Forms.MessageBox;
+using Brushes = System.Windows.Media.Brushes;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
 namespace MegaDeck
 {
@@ -21,7 +25,13 @@ namespace MegaDeck
             LoadCache();
             LoadRoms();
         }
-        
+
+        public void Refresh()
+        {
+            LoadCache(); // Opcional
+            LoadRoms();
+        }
+
         private void LoadCache()
         {
             if (File.Exists(_cachePath))
@@ -76,19 +86,16 @@ namespace MegaDeck
         private void LaunchGame(string cueFilePath)
         {
             string retroarchPath = @".\engine\retroarch.exe";
-            string configPath = @".\engine\retroarch.cfg";
-            string corePath = @".\engine\cores\genesis_plus_gx_libretro.dll";
-
 
             if (!File.Exists(retroarchPath))
             {
-                MessageBox.Show("No se encontró Fusion en la carpeta 'engine'.");
+                MessageBox.Show("RetroArch not found in engine folder.");
                 return;
             }
 
             if (!File.Exists(cueFilePath))
             {
-                MessageBox.Show("No se encontró el archivo .cue del juego.");
+                MessageBox.Show(".cue not found.");
                 return;
             }
 
@@ -96,7 +103,7 @@ namespace MegaDeck
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = retroarchPath, 
+                    FileName = retroarchPath,
                     Arguments = $"-c \"retroarch.cfg\" -L \"cores\\genesis_plus_gx_libretro.dll\" \"{cueFilePath}\" -f",
                     UseShellExecute = false,
                     CreateNoWindow = false,
@@ -104,23 +111,97 @@ namespace MegaDeck
                 }
             };
 
-
             try
             {
                 process.Start();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al lanzar el juego:\n{ex.Message}");
+                MessageBox.Show($"Error launching the game:\n{ex.Message}");
+            }
+        }
+
+        private void OnAssignCoverClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem &&
+                menuItem.Parent is ContextMenu contextMenu &&
+                contextMenu.PlacementTarget is FrameworkElement fe &&
+                fe.Tag is string cuePath)
+            {
+                string cueName = Path.GetFileName(cuePath);
+
+                var dialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = "Image files (*.png;*.jpg)|*.png;*.jpg",
+                    Title = "Select cover"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    Directory.CreateDirectory("images");
+                    string destFile = Path.Combine("images", Path.GetFileName(dialog.FileName));
+                    File.Copy(dialog.FileName, destFile, true);
+
+                    RomImageManager.SetImage(cueName, Path.GetFileName(dialog.FileName));
+                    MessageBox.Show("✔ Custom cover assigned.");
+                    Refresh();
+                }
+            }
+        }
+
+        private void OnRemoveCoverClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem &&
+                menuItem.Parent is ContextMenu contextMenu &&
+                contextMenu.PlacementTarget is FrameworkElement fe &&
+                fe.Tag is string cuePath)
+            {
+                string cueName = Path.GetFileName(cuePath);
+
+                // Eliminar entrada del JSON
+                RomImageManager.RemoveImage(cueName);
+                MessageBox.Show("🗑 Custom cover removed.");
+                Refresh();
+            }
+        }
+
+
+        private void OnRightClickGame(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement fe && fe.Tag is string cuePath)
+            {
+                string cueName = Path.GetFileName(cuePath);
+
+                var dialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Filter = "Image files (*.png;*.jpg)|*.png;*.jpg",
+                    Title = "Select a cover"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    Directory.CreateDirectory("images");
+                    string destFile = Path.Combine("images", Path.GetFileName(dialog.FileName));
+                    File.Copy(dialog.FileName, destFile, true);
+
+                    RomImageManager.SetImage(cueName, Path.GetFileName(dialog.FileName));
+
+                    MessageBox.Show("Custom cover assigned.");
+                    Refresh(); // Recargar la lista con nueva imagen
+                }
             }
         }
 
         private async void LoadRoms()
         {
-            string romFolder = @"c:\roms";
+            var config = ConfigManager.LoadConfig();
+            string romFolder = config.RomsDirectory;
 
-            if (!Directory.Exists(romFolder))
-                Directory.CreateDirectory(romFolder);
+            if (string.IsNullOrWhiteSpace(romFolder) || !Directory.Exists(romFolder))
+            {
+                MessageBox.Show("The ROMs folder is not properly configured. Please go to Settings and select a folder.");
+                return;
+            }
 
             var cueFiles = Directory.GetFiles(romFolder, "*.cue", SearchOption.AllDirectories);
             var gameList = new List<GameInfo>();
@@ -137,16 +218,21 @@ namespace MegaDeck
                 }
                 else
                 {
-                    title = ExtractGameTitle(cue); // O puedes mejorar esto con búsqueda online si quieres
+                    title = ExtractGameTitle(cue);
                     _romTitleCache[fileName] = title;
                     updated = true;
                 }
 
+                // Carátula personalizada
+                string imageName = RomImageManager.GetImage(fileName);
+                string imagePath = !string.IsNullOrEmpty(imageName) && File.Exists($"images/{imageName}")
+                    ? Path.GetFullPath($"images/{imageName}")
+                    : "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
+
                 gameList.Add(new GameInfo
                 {
                     Title = title,
-                    CoverUrl =
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png",
+                    CoverUrl = imagePath,
                     CuePath = cue
                 });
             }
@@ -161,26 +247,15 @@ namespace MegaDeck
         {
             string fileName = Path.GetFileNameWithoutExtension(cueFilePath);
 
-            // Sustituye guiones y underscores por espacio
             fileName = fileName.Replace("_", " ").Replace("-", " ");
-
-            // Elimina paréntesis o corchetes con su contenido
             fileName = System.Text.RegularExpressions.Regex.Replace(fileName, @"[\[\(].*?[\]\)]", "");
-
-            // Elimina "Track XX"
             fileName = System.Text.RegularExpressions.Regex.Replace(fileName, @"Track\s?\d+", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-            // Elimina múltiples espacios
             fileName = System.Text.RegularExpressions.Regex.Replace(fileName, @"\s+", " ");
-
-            // Recorta espacios al inicio y final
             fileName = fileName.Trim();
 
-            // Capitaliza estilo "Title Case"
             var culture = System.Globalization.CultureInfo.InvariantCulture;
             fileName = culture.TextInfo.ToTitleCase(fileName.ToLower());
 
-            // Repara excepciones comunes (opcional)
             fileName = fileName.Replace(" Ii", " II")
                 .Replace(" Iii", " III")
                 .Replace(" Iv", " IV")
