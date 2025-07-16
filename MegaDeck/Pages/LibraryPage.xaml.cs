@@ -21,7 +21,7 @@ namespace MegaDeck
             LoadCache();
             LoadRoms();
         }
-
+        
         private void LoadCache()
         {
             if (File.Exists(_cachePath))
@@ -75,9 +75,12 @@ namespace MegaDeck
 
         private void LaunchGame(string cueFilePath)
         {
-            string fusionPath = @".\engine\Fusion.exe";
+            string retroarchPath = @".\engine\retroarch.exe";
+            string configPath = @".\engine\retroarch.cfg";
+            string corePath = @".\engine\cores\genesis_plus_gx_libretro.dll";
 
-            if (!File.Exists(fusionPath))
+
+            if (!File.Exists(retroarchPath))
             {
                 MessageBox.Show("No se encontró Fusion en la carpeta 'engine'.");
                 return;
@@ -93,13 +96,14 @@ namespace MegaDeck
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = fusionPath,
-                    Arguments = $"\"{cueFilePath}\"",
+                    FileName = retroarchPath, 
+                    Arguments = $"-c \"retroarch.cfg\" -L \"cores\\genesis_plus_gx_libretro.dll\" \"{cueFilePath}\" -f",
                     UseShellExecute = false,
                     CreateNoWindow = false,
-                    WorkingDirectory = Path.GetDirectoryName(fusionPath)
+                    WorkingDirectory = Path.GetDirectoryName(retroarchPath)
                 }
             };
+
 
             try
             {

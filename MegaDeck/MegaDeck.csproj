@@ -11,10 +11,10 @@
 
   <!-- 🔽 Copia automática de la carpeta engine -->
   <ItemGroup>
-    <None Include="engine\**\*.*">
+    <None Include=".\engine\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="roms\**\*.*">
+    <None Include=".\roms\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
