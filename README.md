@@ -1,2 +1,2 @@
 # MegaDeck
-Playground layout for MegaCD/SegaCD based on Kega FUSION 
+Playground layout for MegaCD/SegaCD using RetroArch 
