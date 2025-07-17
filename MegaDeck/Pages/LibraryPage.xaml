@@ -3,43 +3,56 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="LibraryPage">
 
-    <ScrollViewer>
-        <ItemsControl x:Name="RomList" Margin="10">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel IsItemsHost="True"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+    <DockPanel Background="#111">
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Margin="8"
-                            CornerRadius="5"
-                            BorderThickness="2"
-                            BorderBrush="Transparent"
-                            Background="#222"
-                            Tag="{Binding CuePath}"
-                            MouseEnter="OnMouseEnterGame"
-                            MouseLeave="OnMouseLeaveGame"
-                            MouseLeftButtonDown="OnGameClick">
-                        <Border.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Add cover" Click="OnAssignCoverClick"/>
-                                <MenuItem Header="Remove cover" Click="OnRemoveCoverClick"/>
-                            </ContextMenu>
-                        </Border.ContextMenu>
-                        <StackPanel Width="150">
-                            <Image Source="{Binding CoverUrl}" Height="200" Stretch="UniformToFill"/>
-                            <TextBlock Text="{Binding Title}"
-                                       FontSize="14"
-                                       Foreground="White"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       Margin="5"/>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </ScrollViewer>
+        <!-- Menu lateral -->
+        <StackPanel Width="150" Background="#222" DockPanel.Dock="Left">
+            <Button Content="Sega CD" Margin="10" Click="OnSegaCDClick"/>
+            <Button Content="Sega Saturn" Margin="10" Click="OnSaturnClick"/>
+        </StackPanel>
+
+        <!-- Lista de juegos -->
+        <ScrollViewer>
+            <ItemsControl x:Name="RomList" Margin="10">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="8"
+                                CornerRadius="5"
+                                BorderThickness="2"
+                                BorderBrush="Transparent"
+                                Background="#222"
+                                Tag="{Binding CuePath}"
+                                MouseEnter="OnMouseEnterGame"
+                                MouseLeave="OnMouseLeaveGame"
+                                MouseLeftButtonDown="OnGameClick">
+
+                            <!-- Menu contextual -->
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Add cover" Click="OnAssignCoverClick"/>
+                                    <MenuItem Header="Remove cover" Click="OnRemoveCoverClick"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
+
+                            <StackPanel Width="150">
+                                <Image Source="{Binding CoverUrl}" Height="200" Stretch="UniformToFill"/>
+                                <TextBlock Text="{Binding Title}"
+                                           FontSize="14"
+                                           Foreground="White"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           Margin="5"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
 </Page>

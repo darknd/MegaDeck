@@ -1,44 +1,46 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
-using System.Threading.Tasks;
 
 namespace MegaDeck
 {
     public partial class SettingsPage : Page
     {
-        private AppConfig _config;
-
         public SettingsPage()
         {
             InitializeComponent();
-            _config = ConfigManager.LoadConfig();
-            txtRomsPath.Text = _config.RomsDirectory;
+
+            var config = ConfigManager.LoadConfig();
+            SegaCDPathBox.Text = config.RomsDirectory_SegaCD;
+            SaturnPathBox.Text = config.RomsDirectory_Saturn;
         }
 
-        private void Browse_Click(object sender, RoutedEventArgs e)
+        private void BrowseSegaCD_Click(object sender, RoutedEventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog())
+            using var dialog = new FolderBrowserDialog();
+            if (dialog.ShowDialog() == DialogResult.OK)
+                SegaCDPathBox.Text = dialog.SelectedPath;
+        }
+
+        private void BrowseSaturn_Click(object sender, RoutedEventArgs e)
+        {
+            using var dialog = new FolderBrowserDialog();
+            if (dialog.ShowDialog() == DialogResult.OK)
+                SaturnPathBox.Text = dialog.SelectedPath;
+        }
+
+        private void SaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var config = new AppConfig
             {
-                dialog.Description = "Select roms folder";
-                dialog.SelectedPath = _config.RomsDirectory;
+                RomsDirectory_SegaCD = SegaCDPathBox.Text,
+                RomsDirectory_Saturn = SaturnPathBox.Text
+            };
 
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    txtRomsPath.Text = dialog.SelectedPath;
-                }
-            }
-        }
+            ConfigManager.SaveConfig(config);
 
-        private async void Save_Click(object sender, RoutedEventArgs e)
-        {
-            _config.RomsDirectory = txtRomsPath.Text;
-            ConfigManager.SaveConfig(_config);
-            lblStatus.Text = "✔ Saved successfully";
-            lblStatus.Visibility = Visibility.Visible;
-
-            await Task.Delay(2000); // Espera 2 segundos
-            lblStatus.Visibility = Visibility.Collapsed;
+            SaveStatus.Text = "Saved successfully";
+            SaveStatus.Visibility = Visibility.Visible;
         }
     }
 }

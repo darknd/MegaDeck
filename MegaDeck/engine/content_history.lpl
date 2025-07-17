@@ -9,6 +9,24 @@
   "sort_mode": 2,
   "items": [
     {
+      "path": "C:\\roms\\saturn\\Sega Rally Championship (JP) (1995) (Racing) (BIN) (Saturn)\\Sega Rally Championship (JP).cue",
+      "entry_slot": -1,
+      "label": "",
+      "core_path": "D:\\GitHub\\MegaDeck\\MegaDeck\\engine\\cores\\mednafen_saturn_libretro.dll",
+      "core_name": "Sega - Saturn (Beetle Saturn)",
+      "crc32": "",
+      "db_name": ""
+    },
+    {
+      "path": "C:\\roms\\segacd\\Sonic CD\\Sonic The Hedgehog CD (JP).cue",
+      "entry_slot": -1,
+      "label": "",
+      "core_path": "D:\\GitHub\\MegaDeck\\MegaDeck\\engine\\cores\\genesis_plus_gx_libretro.dll",
+      "core_name": "Sega - MS/GG/MD/CD (Genesis Plus GX)",
+      "crc32": "",
+      "db_name": ""
+    },
+    {
       "path": "C:\\roms\\Sonic CD\\Sonic The Hedgehog CD (JP).cue",
       "entry_slot": -1,
       "label": "",

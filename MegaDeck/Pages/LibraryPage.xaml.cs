@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Collections.Generic;
+using System.Linq;
 using MessageBox = System.Windows.Forms.MessageBox;
 using Brushes = System.Windows.Media.Brushes;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
@@ -22,14 +23,13 @@ namespace MegaDeck
         public LibraryPage()
         {
             InitializeComponent();
-            LoadCache();
-            LoadRoms();
+            Refresh();
         }
 
         public void Refresh()
         {
-            LoadCache(); // Opcional
-            LoadRoms();
+            LoadCache();
+            LoadRoms("segacd");
         }
 
         private void LoadCache()
@@ -77,35 +77,59 @@ namespace MegaDeck
 
         private void OnGameClick(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 2 && sender is FrameworkElement fe && fe.Tag is string cuePath)
+            if (e.ClickCount == 2 && sender is FrameworkElement fe && fe.DataContext is GameInfo game)
             {
-                LaunchGame(cuePath);
+                LaunchGame(game);
             }
         }
 
-        private void LaunchGame(string cueFilePath)
+        private void LaunchGame(GameInfo game)
         {
-            string retroarchPath = @".\engine\retroarch.exe";
+            if (game == null || string.IsNullOrEmpty(game.CuePath))
+            {
+                MessageBox.Show("Game data is invalid.");
+                return;
+            }
+
+            // Resolver ruta absoluta del core
+            string corePath = game.System switch
+            {
+                "segacd" => Path.GetFullPath(@".\engine\cores\genesis_plus_gx_libretro.dll"),
+                "saturn" => Path.GetFullPath(@".\engine\cores\mednafen_saturn_libretro.dll"),
+                _ => null
+            };
+
+            if (corePath == null || !File.Exists(corePath))
+            {
+                MessageBox.Show("Core not found.");
+                return;
+            }
+
+            // Ruta absoluta del ejecutable RetroArch
+            string retroarchPath = Path.GetFullPath(@".\engine\retroarch.exe");
 
             if (!File.Exists(retroarchPath))
             {
-                MessageBox.Show("RetroArch not found in engine folder.");
+                MessageBox.Show("RetroArch executable not found.");
                 return;
             }
 
-            if (!File.Exists(cueFilePath))
+            if (!File.Exists(game.CuePath))
             {
-                MessageBox.Show(".cue not found.");
+                MessageBox.Show("Game file not found.");
                 return;
             }
+
+            // Construir argumentos completos
+            string args = $"-c \"retroarch.cfg\" -L \"{corePath}\" \"{game.CuePath}\" -f";
 
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = retroarchPath,
-                    Arguments = $"-c \"retroarch.cfg\" -L \"cores\\genesis_plus_gx_libretro.dll\" \"{cueFilePath}\" -f",
-                    UseShellExecute = false,
+                    Arguments = args,
+                    UseShellExecute = true, // necesario para rutas absolutas
                     CreateNoWindow = false,
                     WorkingDirectory = Path.GetDirectoryName(retroarchPath)
                 }
@@ -120,6 +144,8 @@ namespace MegaDeck
                 MessageBox.Show($"Error launching the game:\n{ex.Message}");
             }
         }
+
+
 
         private void OnAssignCoverClick(object sender, RoutedEventArgs e)
         {
@@ -149,23 +175,6 @@ namespace MegaDeck
             }
         }
 
-        private void OnRemoveCoverClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is MenuItem menuItem &&
-                menuItem.Parent is ContextMenu contextMenu &&
-                contextMenu.PlacementTarget is FrameworkElement fe &&
-                fe.Tag is string cuePath)
-            {
-                string cueName = Path.GetFileName(cuePath);
-
-                // Eliminar entrada del JSON
-                RomImageManager.RemoveImage(cueName);
-                MessageBox.Show("🗑 Custom cover removed.");
-                Refresh();
-            }
-        }
-
-
         private void OnRightClickGame(object sender, MouseButtonEventArgs e)
         {
             if (sender is FrameworkElement fe && fe.Tag is string cuePath)
@@ -186,28 +195,40 @@ namespace MegaDeck
 
                     RomImageManager.SetImage(cueName, Path.GetFileName(dialog.FileName));
 
-                    MessageBox.Show("Custom cover assigned.");
-                    Refresh(); // Recargar la lista con nueva imagen
+                    MessageBox.Show("✔ Custom cover assigned.");
+                    Refresh(); // Recargar la lista con la nueva imagen
                 }
             }
         }
 
-        private async void LoadRoms()
+
+        private void OnRemoveCoverClick(object sender, RoutedEventArgs e)
         {
-            var config = ConfigManager.LoadConfig();
-            string romFolder = config.RomsDirectory;
-
-            if (string.IsNullOrWhiteSpace(romFolder) || !Directory.Exists(romFolder))
+            if (sender is MenuItem menuItem &&
+                menuItem.Parent is ContextMenu contextMenu &&
+                contextMenu.PlacementTarget is FrameworkElement fe &&
+                fe.Tag is string cuePath)
             {
-                MessageBox.Show("The ROMs folder is not properly configured. Please go to Settings and select a folder.");
-                return;
-            }
+                string cueName = Path.GetFileName(cuePath);
 
-            var cueFiles = Directory.GetFiles(romFolder, "*.cue", SearchOption.AllDirectories);
+                RomImageManager.RemoveImage(cueName);
+                MessageBox.Show("🗑 Custom cover removed.");
+                Refresh();
+            }
+        }
+
+        private List<GameInfo> LoadGamesFrom(string romFolder, string system)
+        {
             var gameList = new List<GameInfo>();
+            if (string.IsNullOrWhiteSpace(romFolder) || !Directory.Exists(romFolder))
+                return gameList;
+
+            var romFiles = Directory.GetFiles(romFolder, "*.cue", SearchOption.AllDirectories)
+                .Concat(Directory.GetFiles(romFolder, "*.chd", SearchOption.AllDirectories));
+
             bool updated = false;
 
-            foreach (var cue in cueFiles)
+            foreach (var cue in romFiles)
             {
                 string fileName = Path.GetFileName(cue);
                 string title;
@@ -223,7 +244,6 @@ namespace MegaDeck
                     updated = true;
                 }
 
-                // Carátula personalizada
                 string imageName = RomImageManager.GetImage(fileName);
                 string imagePath = !string.IsNullOrEmpty(imageName) && File.Exists($"images/{imageName}")
                     ? Path.GetFullPath($"images/{imageName}")
@@ -233,14 +253,28 @@ namespace MegaDeck
                 {
                     Title = title,
                     CoverUrl = imagePath,
-                    CuePath = cue
+                    CuePath = cue,
+                    System = system
                 });
             }
 
             if (updated)
                 SaveCache();
 
-            RomList.ItemsSource = gameList;
+            return gameList;
+        }
+
+        private void LoadRoms(string filter)
+        {
+            var config = ConfigManager.LoadConfig();
+            var allGames = new List<GameInfo>();
+
+            if (filter == "segacd")
+                allGames.AddRange(LoadGamesFrom(config.RomsDirectory_SegaCD, "segacd"));
+            else if (filter == "saturn")
+                allGames.AddRange(LoadGamesFrom(config.RomsDirectory_Saturn, "saturn"));
+
+            RomList.ItemsSource = allGames;
         }
 
         private string ExtractGameTitle(string cueFilePath)
@@ -264,11 +298,36 @@ namespace MegaDeck
             return fileName;
         }
 
+        private void FilterSegaCD_Click(object sender, RoutedEventArgs e)
+        {
+            var config = ConfigManager.LoadConfig();
+            var segaCdGames = LoadGamesFrom(config.RomsDirectory_SegaCD, "segacd");
+            RomList.ItemsSource = segaCdGames;
+        }
+
+        private void FilterSaturn_Click(object sender, RoutedEventArgs e)
+        {
+            var config = ConfigManager.LoadConfig();
+            var saturnGames = LoadGamesFrom(config.RomsDirectory_Saturn, "saturn");
+            RomList.ItemsSource = saturnGames;
+        }
+
+        private void OnSegaCDClick(object sender, RoutedEventArgs e)
+        {
+            LoadRoms("segacd");
+        }
+
+        private void OnSaturnClick(object sender, RoutedEventArgs e)
+        {
+            LoadRoms("saturn");
+        }
+
         public class GameInfo
         {
             public string Title { get; set; }
             public string CoverUrl { get; set; }
             public string CuePath { get; set; }
+            public string System { get; set; }
         }
     }
 }
