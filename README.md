@@ -1,8 +1,9 @@
 # 🎮 MegaDeck
 
-MegaDeck is a modern ROM launcher inspired by DuckStation, made for managing and launching Sega CD/Saturn games (by now) via RetroArch.
+MegaDeck is a modern ROM launcher inspired by DuckStation, made for managing and launching Sega CD/Saturn/PC Engine CD/PCFX games (by now) via RetroArch.
 
 ![Screenshot](MegaDeck/engine/megadeck_ui.png)
+![Screenshot](MegaDeck/engine/megadeck_settings.png)
 
 ---
 
@@ -35,7 +36,7 @@ MegaDeck is a modern ROM launcher inspired by DuckStation, made for managing and
 - ✅ .NET 8 Runtime  
   If using the **framework-dependent build**, download it here:  
   [Download .NET 8 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime)
-- ✅ RetroArch and Genesis Plus GX core included in `/engine/`
+- ✅ RetroArch and SegaCD/Saturn/PSX/PCE_CD/PCFX core included in `/engine/`
 
 > 💡 You can use a **self-contained build** that doesn't require installing .NET (see the Releases section).
 
