@@ -18,6 +18,24 @@
                 <Button Content="Browse" Click="BrowseSaturn_Click" Margin="5,0,0,0" />
             </DockPanel>
 
+            <TextBlock Text="PSX:" Foreground="White" Margin="0,15,0,0"/>
+            <DockPanel>
+                <TextBox x:Name="PSXPathBox" Width="400" />
+                <Button Content="Browse" Click="BrowsePSX_Click" Margin="5,0,0,0" />
+            </DockPanel>
+
+            <TextBlock Text="PC Engine CD:" Foreground="White" Margin="0,15,0,0"/>
+            <DockPanel>
+                <TextBox x:Name="PCECDPathBox" Width="400" />
+                <Button Content="Browse" Click="BrowsePCECD_Click" Margin="5,0,0,0" />
+            </DockPanel>
+
+            <TextBlock Text="PCFX:" Foreground="White" Margin="0,15,0,0"/>
+            <DockPanel>
+                <TextBox x:Name="PCFXPathBox" Width="400" />
+                <Button Content="Browse" Click="BrowsePCFX_Click" Margin="5,0,0,0" />
+            </DockPanel>
+
             <Button Content="Save" Click="SaveSettings_Click" Margin="0,30,0,0" Width="100" HorizontalAlignment="Left" />
             <TextBlock x:Name="SaveStatus" Foreground="LightGreen" Visibility="Collapsed" Margin="10,10,0,0"/>
         </StackPanel>

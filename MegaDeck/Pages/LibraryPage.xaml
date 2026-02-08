@@ -1,58 +1,141 @@
 <Page x:Class="MegaDeck.LibraryPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="LibraryPage">
+      Title="LibraryPage"
+      Background="#1E1E2F">
 
-    <DockPanel Background="#111">
+    <Page.Resources>
+        <!-- Colores y estilos -->
+        <SolidColorBrush x:Key="SidebarColor" Color="#222"/>
+        <SolidColorBrush x:Key="ItemBackground" Color="#2D2D3C"/>
+        <SolidColorBrush x:Key="ItemHover" Color="#FF4081"/>
+        <SolidColorBrush x:Key="TextColor" Color="White"/>
 
-        <!-- Menu lateral -->
-        <StackPanel Width="150" Background="#222" DockPanel.Dock="Left">
-            <Button Content="Sega CD" Margin="10" Click="OnSegaCDClick"/>
-            <Button Content="Sega Saturn" Margin="10" Click="OnSaturnClick"/>
+        <!-- Estilo Sidebar ToggleButton -->
+        <Style x:Key="SidebarButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="5,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ItemHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ItemHover}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Border" x:Key="GameItemStyle">
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Background" Value="{StaticResource ItemBackground}"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource ItemHover}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Grid/List Templates -->
+        <ItemsPanelTemplate x:Key="GridViewTemplate">
+            <WrapPanel IsItemsHost="True"/>
+        </ItemsPanelTemplate>
+        <ItemsPanelTemplate x:Key="ListViewTemplate">
+            <StackPanel IsItemsHost="True"/>
+        </ItemsPanelTemplate>
+
+        <!-- DataTemplates de Grid/List -->
+        <DataTemplate x:Key="GridItemTemplate">
+            <Border Style="{StaticResource GameItemStyle}" Tag="{Binding CuePath}" MouseLeftButtonDown="OnGameClick">
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Add cover" Click="OnAssignCoverClick"/>
+                        <MenuItem Header="Remove cover" Click="OnRemoveCoverClick"/>
+                    </ContextMenu>
+                </Border.ContextMenu>
+                <StackPanel Width="150">
+                    <Image Source="{Binding CoverUrl}" Height="200" Stretch="UniformToFill"/>
+                    <TextBlock Text="{Binding Title}" FontSize="14" Foreground="{StaticResource TextColor}" TextAlignment="Center" TextWrapping="Wrap" Margin="5"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ListItemTemplate">
+            <Border Style="{StaticResource GameItemStyle}" Tag="{Binding CuePath}" MouseLeftButtonDown="OnGameClick" Height="80">
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Add cover" Click="OnAssignCoverClick"/>
+                        <MenuItem Header="Remove cover" Click="OnRemoveCoverClick"/>
+                    </ContextMenu>
+                </Border.ContextMenu>
+                <DockPanel>
+                    <Image Source="{Binding CoverUrl}" Width="60" Height="60" Stretch="UniformToFill" Margin="5" DockPanel.Dock="Left"/>
+                    <TextBlock Text="{Binding Title}" FontSize="14" Foreground="{StaticResource TextColor}" VerticalAlignment="Center" Margin="10,0"/>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <!-- Root Grid -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <StackPanel Grid.Column="0" Background="{StaticResource SidebarColor}">
+            <TextBlock Text="Library" Foreground="{StaticResource ItemHover}" FontSize="20" FontWeight="Bold" Margin="10" HorizontalAlignment="Center"/>
+            <ToggleButton x:Name="BtnSegaCD" Content="Sega CD" Style="{StaticResource SidebarButtonStyle}" Checked="OnSegaCDChecked" Unchecked="OnSystemButtonUnchecked"/>
+            <ToggleButton x:Name="BtnPCECD" Content="PC-Engine CD" Style="{StaticResource SidebarButtonStyle}" Checked="OnPCECDChecked" Unchecked="OnSystemButtonUnchecked"/>
+            <ToggleButton x:Name="BtnPCFX" Content="PC-FX" Style="{StaticResource SidebarButtonStyle}" Checked="OnPCFXChecked" Unchecked="OnSystemButtonUnchecked"/>
+            <ToggleButton x:Name="BtnSegaSaturn" Content="Sega Saturn" Style="{StaticResource SidebarButtonStyle}" Checked="OnSaturnChecked" Unchecked="OnSystemButtonUnchecked"/>
+            <ToggleButton x:Name="BtnPSX" Content="Playstation" Style="{StaticResource SidebarButtonStyle}" Checked="OnPSXChecked" Unchecked="OnSystemButtonUnchecked"/>
+
         </StackPanel>
 
-        <!-- Lista de juegos -->
-        <ScrollViewer>
-            <ItemsControl x:Name="RomList" Margin="10">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel IsItemsHost="True"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+        <!-- Contenido principal -->
+        <DockPanel Grid.Column="1">
+            <!-- Barra superior con buscador y toggle -->
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10">
+                <TextBox x:Name="SearchBox" Width="200" Margin="0,0,10,0" 
+                         TextChanged="SearchBox_TextChanged"/>
+                <ToggleButton x:Name="ViewToggleButton" Content="Grid / List" 
+                              Checked="ViewToggleButton_Checked" Unchecked="ViewToggleButton_Unchecked"/>
+            </StackPanel>
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Margin="8"
-                                CornerRadius="5"
-                                BorderThickness="2"
-                                BorderBrush="Transparent"
-                                Background="#222"
-                                Tag="{Binding CuePath}"
-                                MouseEnter="OnMouseEnterGame"
-                                MouseLeave="OnMouseLeaveGame"
-                                MouseLeftButtonDown="OnGameClick">
+            <!-- Lista de juegos -->
+            <ScrollViewer>
+                <ItemsControl x:Name="RomList" Margin="10" 
+                              ItemsPanel="{StaticResource GridViewTemplate}" 
+                              ItemTemplate="{StaticResource GridItemTemplate}"/>
+            </ScrollViewer>
+        </DockPanel>
 
-                            <!-- Menu contextual -->
-                            <Border.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Add cover" Click="OnAssignCoverClick"/>
-                                    <MenuItem Header="Remove cover" Click="OnRemoveCoverClick"/>
-                                </ContextMenu>
-                            </Border.ContextMenu>
-
-                            <StackPanel Width="150">
-                                <Image Source="{Binding CoverUrl}" Height="200" Stretch="UniformToFill"/>
-                                <TextBlock Text="{Binding Title}"
-                                           FontSize="14"
-                                           Foreground="White"
-                                           TextAlignment="Center"
-                                           TextWrapping="Wrap"
-                                           Margin="5"/>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </DockPanel>
+        <!-- Overlay de carga -->
+        <Grid x:Name="LoadingOverlay" Background="#88000000" Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="20"/>
+                <TextBlock Text="Launching game..." Foreground="White" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
 </Page>

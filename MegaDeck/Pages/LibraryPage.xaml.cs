@@ -19,6 +19,14 @@ namespace MegaDeck
         private Border _hoveredItem = null;
         private readonly string _cachePath = "rom_title_cache.json";
         private Dictionary<string, string> _romTitleCache = new Dictionary<string, string>();
+        private List<GameInfo> _allGames = new List<GameInfo>();
+        private List<GameInfo> _segaCdGames = new List<GameInfo>();
+        private List<GameInfo> _saturnGames = new List<GameInfo>();
+        private List<GameInfo> _psxGames = new List<GameInfo>();
+        private List<GameInfo> _pcfxGames = new List<GameInfo>();
+        private List<GameInfo> _pcecdGames = new List<GameInfo>();
+        private List<GameInfo> _displayedGames = new List<GameInfo>();
+
 
         public LibraryPage()
         {
@@ -29,7 +37,60 @@ namespace MegaDeck
         public void Refresh()
         {
             LoadCache();
-            LoadRoms("segacd");
+            var config = ConfigManager.LoadConfig();
+
+            _segaCdGames = LoadGamesFrom(config.RomsDirectory_SegaCD, "segacd");
+            _saturnGames = LoadGamesFrom(config.RomsDirectory_Saturn, "saturn");
+            _psxGames = LoadGamesFrom(config.RomsDirectory_PSX, "psx");
+            _pcfxGames = LoadGamesFrom(config.RomsDirectory_PCFX, "pcfx");
+            _pcecdGames = LoadGamesFrom(config.RomsDirectory_PCECD, "pcecd");
+
+            ShowGames(_segaCdGames);
+        }
+
+        private void ShowGames(List<GameInfo> games)
+        {
+            _displayedGames = new List<GameInfo>(games);
+            RomList.ItemsSource = _displayedGames;
+        }
+
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string query = SearchBox.Text.ToLower();
+            var filtered = _displayedGames
+                .Where(g => g.Title.ToLower().Contains(query))
+                .ToList();
+
+            RomList.ItemsSource = filtered;
+        }
+
+        private void OnSegaCDChecked(object sender, RoutedEventArgs e)
+        {
+            BtnSegaSaturn.IsChecked = false;
+            ShowGames(_segaCdGames);
+        }
+
+        private void OnSaturnChecked(object sender, RoutedEventArgs e)
+        {
+            BtnSegaCD.IsChecked = false;
+            ShowGames(_saturnGames);
+        }
+
+        private void OnPSXChecked(object sender, RoutedEventArgs e)
+        {
+            BtnPSX.IsChecked = false;
+            ShowGames(_psxGames);
+        }
+
+        private void OnPCFXChecked(object sender, RoutedEventArgs e)
+        {
+            BtnPCFX.IsChecked = false;
+            ShowGames(_pcfxGames);
+        }
+        private void OnPCECDChecked(object sender, RoutedEventArgs e)
+        {
+            BtnPCECD.IsChecked = false;
+            ShowGames(_pcecdGames);
         }
 
         private void LoadCache()
@@ -75,11 +136,23 @@ namespace MegaDeck
             }
         }
 
-        private void OnGameClick(object sender, MouseButtonEventArgs e)
+        private async void OnGameClick(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 2 && sender is FrameworkElement fe && fe.DataContext is GameInfo game)
+            if (e.ClickCount != 2 || !(sender is FrameworkElement fe) || !(fe.DataContext is GameInfo game))
+                return;
+
+            try
             {
-                LaunchGame(game);
+                // Mostrar overlay
+                LoadingOverlay.Visibility = Visibility.Visible;
+
+                // Lanzar el juego en un hilo aparte para no bloquear la UI
+                await Task.Run(() => LaunchGame(game));
+            }
+            finally
+            {
+                // Ocultar overlay después de lanzar
+                LoadingOverlay.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -96,6 +169,9 @@ namespace MegaDeck
             {
                 "segacd" => Path.GetFullPath(@".\engine\cores\genesis_plus_gx_libretro.dll"),
                 "saturn" => Path.GetFullPath(@".\engine\cores\mednafen_saturn_libretro.dll"),
+                "psx" => Path.GetFullPath(@".\engine\cores\mednafen_psx_libretro.dll"),
+                "pcfx" => Path.GetFullPath(@".\engine\cores\mednafen_pcfx_libretro.dll"),
+                "pcecd" => Path.GetFullPath(@".\engine\cores\mednafen_pce_libretro.dll"),
                 _ => null
             };
 
@@ -135,6 +211,7 @@ namespace MegaDeck
                 }
             };
 
+
             try
             {
                 process.Start();
@@ -144,8 +221,6 @@ namespace MegaDeck
                 MessageBox.Show($"Error launching the game:\n{ex.Message}");
             }
         }
-
-
 
         private void OnAssignCoverClick(object sender, RoutedEventArgs e)
         {
@@ -200,7 +275,6 @@ namespace MegaDeck
                 }
             }
         }
-
 
         private void OnRemoveCoverClick(object sender, RoutedEventArgs e)
         {
@@ -267,14 +341,20 @@ namespace MegaDeck
         private void LoadRoms(string filter)
         {
             var config = ConfigManager.LoadConfig();
-            var allGames = new List<GameInfo>();
+            _allGames.Clear();
 
             if (filter == "segacd")
-                allGames.AddRange(LoadGamesFrom(config.RomsDirectory_SegaCD, "segacd"));
+                _allGames.AddRange(LoadGamesFrom(config.RomsDirectory_SegaCD, "segacd"));
             else if (filter == "saturn")
-                allGames.AddRange(LoadGamesFrom(config.RomsDirectory_Saturn, "saturn"));
+                _allGames.AddRange(LoadGamesFrom(config.RomsDirectory_Saturn, "saturn"));
+            else if (filter == "psx")
+                _allGames.AddRange(LoadGamesFrom(config.RomsDirectory_PSX, "psx"));
+            else if (filter == "pcfx")
+                _allGames.AddRange(LoadGamesFrom(config.RomsDirectory_PCFX, "pcfx"));
+            else if (filter == "pcecd")
+                _allGames.AddRange(LoadGamesFrom(config.RomsDirectory_PCECD, "pcecd"));
 
-            RomList.ItemsSource = allGames;
+            RomList.ItemsSource = _allGames;
         }
 
         private string ExtractGameTitle(string cueFilePath)
@@ -304,22 +384,67 @@ namespace MegaDeck
             var segaCdGames = LoadGamesFrom(config.RomsDirectory_SegaCD, "segacd");
             RomList.ItemsSource = segaCdGames;
         }
-
         private void FilterSaturn_Click(object sender, RoutedEventArgs e)
         {
             var config = ConfigManager.LoadConfig();
             var saturnGames = LoadGamesFrom(config.RomsDirectory_Saturn, "saturn");
             RomList.ItemsSource = saturnGames;
         }
+        private void FilterPSX_Click(object sender, RoutedEventArgs e)
+        {
+            var config = ConfigManager.LoadConfig();
+            var psxGames = LoadGamesFrom(config.RomsDirectory_PSX, "psx");
+            RomList.ItemsSource = psxGames;
+        }
+        private void FilterPCFX_Click(object sender, RoutedEventArgs e)
+        {
+            var config = ConfigManager.LoadConfig();
+            var pcfxGames = LoadGamesFrom(config.RomsDirectory_PCFX, "pcfx");
+            RomList.ItemsSource = pcfxGames;
+        }
+        private void FilterPCECD_Click(object sender, RoutedEventArgs e)
+        {
+            var config = ConfigManager.LoadConfig();
+            var pcecdGames = LoadGamesFrom(config.RomsDirectory_PCECD, "pcecd");
+            RomList.ItemsSource = pcecdGames;
+        }
 
         private void OnSegaCDClick(object sender, RoutedEventArgs e)
         {
             LoadRoms("segacd");
         }
-
         private void OnSaturnClick(object sender, RoutedEventArgs e)
         {
             LoadRoms("saturn");
+        }
+        private void OnPSXClick(object sender, RoutedEventArgs e)
+        {
+            LoadRoms("psx");
+        }
+        private void OnPCFXClick(object sender, RoutedEventArgs e)
+        {
+            LoadRoms("pcfx");
+        }
+        private void OnPCECDClick(object sender, RoutedEventArgs e)
+        {
+            LoadRoms("pcecd");
+        }
+
+        private void ViewToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            RomList.ItemsPanel = (ItemsPanelTemplate)Resources["ListViewTemplate"];
+            RomList.ItemTemplate = (DataTemplate)Resources["ListItemTemplate"];
+        }
+
+        private void ViewToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            RomList.ItemsPanel = (ItemsPanelTemplate)Resources["GridViewTemplate"];
+            RomList.ItemTemplate = (DataTemplate)Resources["GameItemTemplate"]; 
+        }
+
+        private void OnSystemButtonUnchecked(object sender, RoutedEventArgs e)
+        {
+            // Opcional: dejar todos desmarcados
         }
 
         public class GameInfo
