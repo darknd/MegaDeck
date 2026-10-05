@@ -12,22 +12,22 @@ namespace MegaDeck
     {
         /// <summary>
         /// Lanza <paramref name="contentPath"/> (la ROM, o el .cue/.chd extraído de un .zip)
-        /// con el core del sistema. Devuelve un mensaje de error o null si ha arrancado.
+        /// con el core del sistema. Devuelve el proceso de RetroArch, o un mensaje de error.
         /// </summary>
-        public static string? Launch(GameSystem system, string contentPath)
+        public static LaunchResult Launch(GameSystem system, string contentPath)
         {
             if (!File.Exists(contentPath))
-                return "Game file not found.";
+                return LaunchResult.Fail("Game file not found.");
 
             if (OperatingSystem.IsWindows())
                 return LaunchWindows(system, contentPath);
             if (OperatingSystem.IsLinux())
                 return LaunchLinux(system, contentPath);
 
-            return "This operating system is not supported.";
+            return LaunchResult.Fail("This operating system is not supported.");
         }
 
-        private static string? LaunchWindows(GameSystem system, string contentPath)
+        private static LaunchResult LaunchWindows(GameSystem system, string contentPath)
         {
             string engine = AppPaths.EngineDir;
             string retroarch = Path.Combine(engine, "retroarch.exe");
@@ -36,7 +36,7 @@ namespace MegaDeck
             return Start(retroarch, core, engine, ["-c", Path.Combine(engine, "retroarch.cfg")], contentPath);
         }
 
-        private static string? LaunchLinux(GameSystem system, string contentPath)
+        private static LaunchResult LaunchLinux(GameSystem system, string contentPath)
         {
             string engine = AppPaths.EngineLinuxDir;
             string retroarch = Path.Combine(engine, "bin", "retroarch");
@@ -52,19 +52,19 @@ namespace MegaDeck
             }
             catch (Exception ex)
             {
-                return $"Could not write RetroArch config:\n{ex.Message}";
+                return LaunchResult.Fail($"Could not write RetroArch config:\n{ex.Message}");
             }
 
             return Start(retroarch, core, engine,
                 ["-c", Path.Combine(engine, "retroarch.cfg"), "--appendconfig", pathsCfg], contentPath);
         }
 
-        private static string? Start(string retroarch, string core, string workingDir, string[] configArgs, string contentPath)
+        private static LaunchResult Start(string retroarch, string core, string workingDir, string[] configArgs, string contentPath)
         {
             if (!File.Exists(retroarch))
-                return $"RetroArch executable not found:\n{retroarch}";
+                return LaunchResult.Fail($"RetroArch executable not found:\n{retroarch}");
             if (!File.Exists(core))
-                return $"Core not found:\n{core}";
+                return LaunchResult.Fail($"Core not found:\n{core}");
 
             var startInfo = new ProcessStartInfo
             {
@@ -81,12 +81,14 @@ namespace MegaDeck
 
             try
             {
-                Process.Start(startInfo);
-                return null;
+                var process = Process.Start(startInfo);
+                return process != null
+                    ? new LaunchResult(process, null)
+                    : LaunchResult.Fail("RetroArch did not start.");
             }
             catch (Exception ex)
             {
-                return $"Error launching the game:\n{ex.Message}";
+                return LaunchResult.Fail($"Error launching the game:\n{ex.Message}");
             }
         }
 
@@ -160,5 +162,10 @@ namespace MegaDeck
                 }
             }
         }
+    }
+
+    public record LaunchResult(Process? Process, string? Error)
+    {
+        public static LaunchResult Fail(string error) => new(null, error);
     }
 }

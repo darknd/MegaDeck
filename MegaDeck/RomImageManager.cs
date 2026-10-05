@@ -6,6 +6,7 @@ namespace MegaDeck
     public static class RomImageManager
     {
         private static Dictionary<string, string> _map = Load();
+        private static readonly object Lock = new();
 
         private static Dictionary<string, string> Load()
         {
@@ -23,7 +24,7 @@ namespace MegaDeck
             return new Dictionary<string, string>();
         }
 
-        public static void Save()
+        private static void Save()
         {
             var json = JsonSerializer.Serialize(_map, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(AppPaths.ImageMapFile, json);
@@ -38,16 +39,36 @@ namespace MegaDeck
             Directory.CreateDirectory(AppPaths.ImagesDir);
             string imageFileName = Path.GetFileNameWithoutExtension(romFileName) + Path.GetExtension(sourceImagePath).ToLowerInvariant();
             File.Copy(sourceImagePath, Path.Combine(AppPaths.ImagesDir, imageFileName), true);
+            SetImage(romFileName, imageFileName);
+        }
 
-            _map[romFileName] = imageFileName;
-            Save();
+        /// <summary>Guarda una carátula descargada (JPEG) como images/&lt;nombre de la ROM&gt;.jpg y la asigna.</summary>
+        public static void AssignCover(string romFileName, byte[] jpeg)
+        {
+            Directory.CreateDirectory(AppPaths.ImagesDir);
+            string imageFileName = Path.GetFileNameWithoutExtension(romFileName) + ".jpg";
+            File.WriteAllBytes(Path.Combine(AppPaths.ImagesDir, imageFileName), jpeg);
+            SetImage(romFileName, imageFileName);
+        }
+
+        private static void SetImage(string romFileName, string imageFileName)
+        {
+            lock (Lock)
+            {
+                _map[romFileName] = imageFileName;
+                Save();
+            }
         }
 
         /// <summary>Ruta absoluta de la portada, o null si no hay o el archivo ya no existe.</summary>
         public static string? GetImagePath(string romFileName)
         {
-            if (!_map.TryGetValue(romFileName, out var image))
-                return null;
+            string? image;
+            lock (Lock)
+            {
+                if (!_map.TryGetValue(romFileName, out image))
+                    return null;
+            }
 
             string path = Path.Combine(AppPaths.ImagesDir, image);
             return File.Exists(path) ? path : null;
@@ -55,8 +76,11 @@ namespace MegaDeck
 
         public static void RemoveImage(string romFileName)
         {
-            if (_map.Remove(romFileName))
-                Save();
+            lock (Lock)
+            {
+                if (_map.Remove(romFileName))
+                    Save();
+            }
         }
     }
 }

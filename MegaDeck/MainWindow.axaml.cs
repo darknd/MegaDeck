@@ -146,27 +146,9 @@ namespace MegaDeck
 
             try
             {
-                string contentPath = game.RomPath;
-                if (game.IsZip)
-                {
-                    string? extracted = ZipGameExtractor.GetCachedGame(game.RomPath)
-                                        ?? await ExtractDialog.ExtractAsync(this, game);
-                    if (extracted == null)
-                        return; // cancelado o error (ya se ha mostrado)
-                    contentPath = extracted;
-                }
-
-                SetStatus($"Starting {game.Title}...");
-                string? error = await Task.Run(() => RetroArchLauncher.Launch(game.System, contentPath));
-                if (error != null)
-                {
-                    SetStatus("Ready");
-                    await MessageBox.ShowDialog(this, error, "MegaDeck", MessageBoxButtons.Ok, MessageBoxIcon.Error);
-                }
-                else
-                {
-                    SetStatus($"Running {game.Title}");
-                }
+                SetStatus($"Loading {game.Title}...");
+                bool started = await LaunchDialog.LaunchAsync(this, game);
+                SetStatus(started ? $"Running {game.Title}" : "Ready");
             }
             finally
             {
@@ -206,6 +188,50 @@ namespace MegaDeck
                 return;
             }
             Refresh();
+        }
+
+        private async void OnDownloadCoverClick(object? sender, RoutedEventArgs e)
+        {
+            if (GetTargetGame(sender) is not { } game)
+                return;
+
+            if (game.HasCover && await MessageBox.ShowDialog(this, $"'{game.Title}' already has a cover.\nDo you want to replace it?",
+                    "Download cover", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != MessageBoxResult.Yes)
+                return;
+
+            SetStatus($"Downloading cover for {game.Title}...");
+            try
+            {
+                var result = await Task.Run(() => CoverDownloader.DownloadAsync(game, overwrite: true, CancellationToken.None));
+                if (result == CoverDownloader.Result.NotFound)
+                    await MessageBox.ShowDialog(this, $"No cover was found for '{game.FileName}'.", "Download cover",
+                        MessageBoxButtons.Ok, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                await MessageBox.ShowDialog(this, $"Could not download the cover:\n{ex.Message}", "Download cover",
+                    MessageBoxButtons.Ok, MessageBoxIcon.Error);
+            }
+            Refresh();
+        }
+
+        /// <summary>Descarga las carátulas que faltan del sistema seleccionado, o de todos si está seleccionado "MegaDeck".</summary>
+        private async void OnDownloadCoversClick(object? sender, RoutedEventArgs e)
+        {
+            var system = SelectedSystem;
+            var games = system != null
+                ? _gamesBySystem.GetValueOrDefault(system.Id, [])
+                : _gamesBySystem.Values.SelectMany(g => g).ToList();
+
+            if (games.Count == 0)
+            {
+                await MessageBox.ShowDialog(this, "There are no games to download covers for.\nSet the ROM folders in Tools > Settings.",
+                    "Download Covers", MessageBoxButtons.Ok, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (await CoverDownloadDialog.RunAsync(this, games, system?.DisplayName ?? "all systems"))
+                Refresh();
         }
 
         private void OnRemoveCoverClick(object? sender, RoutedEventArgs e)

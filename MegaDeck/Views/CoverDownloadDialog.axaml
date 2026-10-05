@@ -1,0 +1,25 @@
+<ClassicWindow xmlns="https://github.com/avaloniaui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               x:Class="MegaDeck.Views.CoverDownloadDialog"
+               Title="Download Covers"
+               Icon="/megadeck.ico"
+               SizeToContent="WidthAndHeight"
+               WindowStartupLocation="CenterOwner"
+               CanResize="False"
+               ShowInTaskbar="False">
+
+    <StackPanel Margin="12,10" Width="380" Spacing="6">
+        <DockPanel Margin="0,0,0,4">
+            <Image Source="/Assets/cd32.png" Width="32" Height="32" VerticalAlignment="Top"
+                   RenderOptions.BitmapInterpolationMode="None"/>
+            <TextBlock x:Name="HeaderText" Margin="10,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center"/>
+        </DockPanel>
+
+        <TextBlock x:Name="CurrentText" TextTrimming="CharacterEllipsis"/>
+        <ProgressBar x:Name="Progress" Minimum="0" Maximum="100" Height="18" Margin="0,2"/>
+        <TextBlock x:Name="CountText"/>
+
+        <Button x:Name="CancelButton" Content="Cancel" IsCancel="True" HorizontalAlignment="Right" MinWidth="75"
+                Margin="0,6,0,0" Click="OnCancelClick"/>
+    </StackPanel>
+</ClassicWindow>

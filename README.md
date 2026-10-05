@@ -16,7 +16,8 @@ MegaDeck is a modern ROM launcher inspired by DuckStation, made for managing and
 ## 💾 Features
 
 - Windows 95 style interface (Large Icons / Details views, classic dialogs)
-- Custom cover support
+- Custom cover support, and automatic cover download from the [libretro thumbnails](https://thumbnails.libretro.com/) server
+- Loading screen while a game is extracted and RetroArch starts
 - ROM folder browser
 - `.cue`, `.chd` and `.zip` games (zipped games are extracted to `cache/` before launching)
 - RetroArch integration (included with the necessary bios files)

@@ -1,0 +1,54 @@
+<ClassicWindow xmlns="https://github.com/avaloniaui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:local="using:MegaDeck"
+               x:Class="MegaDeck.Views.LaunchDialog"
+               Title="Loading"
+               Icon="/megadeck.ico"
+               SizeToContent="WidthAndHeight"
+               WindowStartupLocation="CenterOwner"
+               CanResize="False"
+               ShowInTaskbar="False">
+
+    <ClassicWindow.Styles>
+        <!-- Pasos: pendiente (gris), actual (negrita), hecho (normal con ✓) -->
+        <Style Selector="TextBlock.step">
+            <Setter Property="Foreground" Value="Gray"/>
+        </Style>
+        <Style Selector="TextBlock.step.current">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="TextBlock.step.done">
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+    </ClassicWindow.Styles>
+
+    <StackPanel Margin="12,12,12,10" Spacing="10">
+        <StackPanel Orientation="Horizontal" Spacing="14">
+            <!-- Carátula -->
+            <ClassicBorderDecorator BorderStyle="Sunken" BorderThickness="2" VerticalAlignment="Top">
+                <Panel Width="96" Height="128" Background="White" ClipToBounds="True">
+                    <Image x:Name="CdIcon" Source="{x:Static local:Icons.Cd48}" Width="48" Height="48"
+                           RenderOptions.BitmapInterpolationMode="None"/>
+                    <Image x:Name="CoverImage" Stretch="UniformToFill"/>
+                </Panel>
+            </ClassicBorderDecorator>
+
+            <StackPanel Width="300" Spacing="4">
+                <TextBlock x:Name="TitleText" FontSize="{DynamicResource FontSizeLarge}" FontWeight="Bold"
+                           TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="SystemText" Foreground="Gray"/>
+                <Separator Margin="0,6"/>
+                <TextBlock x:Name="StepExtract" Classes="step" Text="   Extracting files"/>
+                <TextBlock x:Name="StepStart" Classes="step" Text="   Starting RetroArch"/>
+                <TextBlock x:Name="StepLoad" Classes="step" Text="   Loading game"/>
+            </StackPanel>
+        </StackPanel>
+
+        <ProgressBar x:Name="Progress" Minimum="0" Maximum="100" Height="18"/>
+        <DockPanel>
+            <Button x:Name="CancelButton" DockPanel.Dock="Right" Content="Cancel" IsCancel="True" MinWidth="75" Click="OnCancelClick"/>
+            <TextBlock x:Name="DetailText" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+        </DockPanel>
+    </StackPanel>
+</ClassicWindow>
