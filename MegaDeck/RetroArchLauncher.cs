@@ -10,34 +10,37 @@ namespace MegaDeck
     /// </summary>
     public static class RetroArchLauncher
     {
-        /// <summary>Lanza el juego. Devuelve un mensaje de error o null si ha arrancado.</summary>
-        public static string? Launch(GameInfo game)
+        /// <summary>
+        /// Lanza <paramref name="contentPath"/> (la ROM, o el .cue/.chd extraído de un .zip)
+        /// con el core del sistema. Devuelve un mensaje de error o null si ha arrancado.
+        /// </summary>
+        public static string? Launch(GameSystem system, string contentPath)
         {
-            if (!File.Exists(game.RomPath))
+            if (!File.Exists(contentPath))
                 return "Game file not found.";
 
             if (OperatingSystem.IsWindows())
-                return LaunchWindows(game);
+                return LaunchWindows(system, contentPath);
             if (OperatingSystem.IsLinux())
-                return LaunchLinux(game);
+                return LaunchLinux(system, contentPath);
 
             return "This operating system is not supported.";
         }
 
-        private static string? LaunchWindows(GameInfo game)
+        private static string? LaunchWindows(GameSystem system, string contentPath)
         {
             string engine = AppPaths.EngineDir;
             string retroarch = Path.Combine(engine, "retroarch.exe");
-            string core = Path.Combine(engine, "cores", $"{game.System.Core}_libretro.dll");
+            string core = Path.Combine(engine, "cores", $"{system.Core}_libretro.dll");
 
-            return Start(retroarch, core, engine, ["-c", Path.Combine(engine, "retroarch.cfg")], game);
+            return Start(retroarch, core, engine, ["-c", Path.Combine(engine, "retroarch.cfg")], contentPath);
         }
 
-        private static string? LaunchLinux(GameInfo game)
+        private static string? LaunchLinux(GameSystem system, string contentPath)
         {
             string engine = AppPaths.EngineLinuxDir;
             string retroarch = Path.Combine(engine, "bin", "retroarch");
-            string core = Path.Combine(engine, "cores", $"{game.System.Core}_libretro.so");
+            string core = Path.Combine(engine, "cores", $"{system.Core}_libretro.so");
 
             if (File.Exists(retroarch))
                 EnsureExecutable(retroarch);
@@ -53,10 +56,10 @@ namespace MegaDeck
             }
 
             return Start(retroarch, core, engine,
-                ["-c", Path.Combine(engine, "retroarch.cfg"), "--appendconfig", pathsCfg], game);
+                ["-c", Path.Combine(engine, "retroarch.cfg"), "--appendconfig", pathsCfg], contentPath);
         }
 
-        private static string? Start(string retroarch, string core, string workingDir, string[] configArgs, GameInfo game)
+        private static string? Start(string retroarch, string core, string workingDir, string[] configArgs, string contentPath)
         {
             if (!File.Exists(retroarch))
                 return $"RetroArch executable not found:\n{retroarch}";
@@ -73,7 +76,7 @@ namespace MegaDeck
                 startInfo.ArgumentList.Add(arg);
             startInfo.ArgumentList.Add("-L");
             startInfo.ArgumentList.Add(core);
-            startInfo.ArgumentList.Add(game.RomPath);
+            startInfo.ArgumentList.Add(contentPath);
             startInfo.ArgumentList.Add("-f");
 
             try

@@ -9,6 +9,10 @@ public class GameInfo
     public required GameSystem System { get; init; }
     public string? CoverPath { get; init; }
 
+    public string FileName => Path.GetFileName(RomPath);
+    public string FileType => Path.GetExtension(RomPath).TrimStart('.').ToUpperInvariant();
+    public bool IsZip => FileType == "ZIP";
+
     private Bitmap? _cover;
     private bool _coverLoaded;
 

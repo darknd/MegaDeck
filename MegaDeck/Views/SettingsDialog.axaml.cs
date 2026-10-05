@@ -2,18 +2,21 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Classic.Avalonia.Theme;
+using Classic.CommonControls.Dialogs;
 using MegaDeck.Models;
 
 namespace MegaDeck.Views
 {
-    public partial class SettingsView : UserControl
+    /// <summary>Diálogo de ajustes. Devuelve true en ShowDialog si se ha guardado algún cambio.</summary>
+    public partial class SettingsDialog : ClassicWindow
     {
         private readonly AppConfig _config;
         private readonly List<RomDirectoryEntry> _entries;
+        private bool _saved;
 
-        public SettingsView()
+        public SettingsDialog()
         {
             InitializeComponent();
 
@@ -21,29 +24,37 @@ namespace MegaDeck.Views
             _entries = GameSystem.All
                 .Select(s => new RomDirectoryEntry(s.Id, s.DisplayName + ":") { Path = _config.GetRomsDirectory(s.Id) })
                 .ToList();
+            foreach (var entry in _entries)
+                entry.PropertyChanged += (_, _) => ApplyButton.IsEnabled = true;
             DirectoryList.ItemsSource = _entries;
         }
 
-        private async void Browse_Click(object? sender, RoutedEventArgs e)
+        private async void OnBrowseClick(object? sender, RoutedEventArgs e)
         {
             if ((sender as Control)?.DataContext is not RomDirectoryEntry entry)
                 return;
 
-            var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel == null)
-                return;
-
             var options = new FolderPickerOpenOptions { Title = $"ROM folder - {entry.Label.TrimEnd(':')}" };
             if (Directory.Exists(entry.Path))
-                options.SuggestedStartLocation = await topLevel.StorageProvider.TryGetFolderFromPathAsync(entry.Path);
+                options.SuggestedStartLocation = await StorageProvider.TryGetFolderFromPathAsync(entry.Path);
 
-            var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
+            var folders = await StorageProvider.OpenFolderPickerAsync(options);
             string? path = folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
             if (path != null)
                 entry.Path = path;
         }
 
-        private void SaveSettings_Click(object? sender, RoutedEventArgs e)
+        private async void OnOkClick(object? sender, RoutedEventArgs e)
+        {
+            if (!ApplyButton.IsEnabled || await SaveAsync())
+                Close(_saved);
+        }
+
+        private void OnCancelClick(object? sender, RoutedEventArgs e) => Close(_saved);
+
+        private async void OnApplyClick(object? sender, RoutedEventArgs e) => await SaveAsync();
+
+        private async Task<bool> SaveAsync()
         {
             foreach (var entry in _entries)
                 _config.SetRomsDirectory(entry.SystemId, entry.Path.Trim());
@@ -51,15 +62,17 @@ namespace MegaDeck.Views
             try
             {
                 ConfigManager.SaveConfig(_config);
-                SaveStatus.Text = "Saved successfully";
-                SaveStatus.Foreground = Brushes.LightGreen;
             }
             catch (Exception ex)
             {
-                SaveStatus.Text = $"Could not save: {ex.Message}";
-                SaveStatus.Foreground = Brushes.OrangeRed;
+                await MessageBox.ShowDialog(this, $"Could not save the settings:\n{ex.Message}", "Settings",
+                    MessageBoxButtons.Ok, MessageBoxIcon.Error);
+                return false;
             }
-            SaveStatus.IsVisible = true;
+
+            _saved = true;
+            ApplyButton.IsEnabled = false;
+            return true;
         }
     }
 
@@ -72,7 +85,13 @@ namespace MegaDeck.Views
         public string Path
         {
             get => _path;
-            set { _path = value; OnPropertyChanged(); }
+            set
+            {
+                if (_path == value)
+                    return;
+                _path = value;
+                OnPropertyChanged();
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

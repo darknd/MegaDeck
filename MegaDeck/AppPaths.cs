@@ -12,6 +12,7 @@ public static class AppPaths
     public static string TitleCacheFile => Path.Combine(BaseDir, "rom_title_cache.json");
     public static string ImageMapFile => Path.Combine(BaseDir, "rom_image_map.json");
     public static string ImagesDir => Path.Combine(BaseDir, "images");
+    public static string ExtractCacheDir => Path.Combine(BaseDir, "cache");
 
     /// <summary>RetroArch de Windows. También guarda BIOS, saves, shaders y config compartidos con Linux.</summary>
     public static string EngineDir => Path.Combine(BaseDir, "engine");

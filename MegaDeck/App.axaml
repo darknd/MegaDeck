@@ -1,70 +1,54 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:common="clr-namespace:Classic.CommonControls;assembly=Classic.CommonControls.Avalonia"
              x:Class="MegaDeck.App"
-             RequestedThemeVariant="Dark">
+             RequestedThemeVariant="{x:Static ClassicTheme.Classic}">
 
+    <!-- Tamaños de letra mayores que los del tema (11 px): Tahoma sin suavizado
+         se deforma a ese tamaño en pantallas actuales. -->
     <Application.Resources>
-        <!-- Colores principales -->
-        <SolidColorBrush x:Key="PrimaryColor" Color="#1E1E2F"/>
-        <SolidColorBrush x:Key="SecondaryColor" Color="#2D2D3C"/>
-        <SolidColorBrush x:Key="SidebarColor" Color="#222222"/>
-        <SolidColorBrush x:Key="ItemBackground" Color="#2D2D3C"/>
-        <SolidColorBrush x:Key="AccentColor" Color="#FF4081"/>
-        <SolidColorBrush x:Key="ButtonHoverColor" Color="#FF5C91"/>
-        <SolidColorBrush x:Key="TextColor" Color="White"/>
+        <x:Double x:Key="FontSizeSmall">11</x:Double>
+        <x:Double x:Key="FontSizeNormal">13</x:Double>
+        <x:Double x:Key="FontSizeLarge">15</x:Double>
+        <x:Double x:Key="{x:Static common:NonClientMetrics.CaptionFontSizeKey}">13</x:Double>
+        <x:Double x:Key="{x:Static common:SystemParameters.WindowCaptionHeightKey}">22</x:Double>
+        <x:Double x:Key="{x:Static common:SystemParameters.MenuBarHeightKey}">22</x:Double>
     </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme/>
+        <!-- Tema Windows 9x (variante "Classic": gris plata y títulos azul marino de Windows 95) -->
+        <ClassicTheme FontAliasing="False"/>
 
-        <!-- Botones de la barra lateral principal -->
-        <Style Selector="Button.sidebar">
+        <!-- Vista "Iconos grandes": como el Explorador, solo se resalta la etiqueta del elemento -->
+        <Style Selector="ListBox.icons ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static common:SystemColors.WindowTextBrushKey}}"/>
+        </Style>
+        <Style Selector="ListBox.icons ListBoxItem:selected /template/ Border#Bd">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+        <Style Selector="ListBox.icons ListBoxItem TextBlock.label">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static common:SystemColors.WindowTextBrushKey}}"/>
+        </Style>
+        <Style Selector="ListBox.icons ListBoxItem:selected TextBlock.label">
+            <Setter Property="Background" Value="{DynamicResource {x:Static common:SystemColors.HighlightBrushKey}}"/>
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static common:SystemColors.HighlightTextBrushKey}}"/>
+        </Style>
+        <Style Selector="ListBox.icons ListBoxItem Border.tint">
+            <Setter Property="IsVisible" Value="False"/>
+            <Setter Property="Background" Value="{DynamicResource {x:Static common:SystemColors.HighlightBrushKey}}"/>
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
+        <Style Selector="ListBox.icons ListBoxItem:selected Border.tint">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+
+        <!-- Cabeceras de columna de la vista "Detalles" -->
+        <Style Selector="Button.column">
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="5,2"/>
-            <Setter Property="CornerRadius" Value="5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style Selector="Button.sidebar:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{StaticResource ButtonHoverColor}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
-        </Style>
-
-        <!-- Lista de sistemas de la biblioteca -->
-        <Style Selector="ListBox.systems">
-            <Setter Property="Background" Value="Transparent"/>
-        </Style>
-        <Style Selector="ListBox.systems ListBoxItem">
-            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="15,8"/>
-            <Setter Property="Margin" Value="5,2"/>
-            <Setter Property="CornerRadius" Value="5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style Selector="ListBox.systems ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{StaticResource ButtonHoverColor}"/>
-        </Style>
-        <Style Selector="ListBox.systems ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{StaticResource AccentColor}"/>
-        </Style>
-
-        <!-- Tarjetas de juego -->
-        <Style Selector="Border.game">
-            <Setter Property="CornerRadius" Value="5"/>
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="Background" Value="{StaticResource ItemBackground}"/>
-            <Setter Property="Margin" Value="8"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        <Style Selector="Border.game:pointerover">
-            <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+            <Setter Property="Padding" Value="5,1"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
         </Style>
     </Application.Styles>
 </Application>

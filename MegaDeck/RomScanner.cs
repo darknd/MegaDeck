@@ -5,10 +5,10 @@ using MegaDeck.Models;
 
 namespace MegaDeck
 {
-    /// <summary>Busca .cue/.chd en las carpetas configuradas y genera títulos legibles (con caché).</summary>
+    /// <summary>Busca .cue/.chd/.zip en las carpetas configuradas y genera títulos legibles (con caché).</summary>
     public class RomScanner
     {
-        private static readonly string[] RomExtensions = [".cue", ".chd"];
+        private static readonly string[] RomExtensions = [".cue", ".chd", ".zip"];
 
         private Dictionary<string, string> _titleCache = new();
 
@@ -36,7 +36,8 @@ namespace MegaDeck
 
             // Se compara la extensión sin distinguir mayúsculas: en Linux "*.cue" no encontraría "GAME.CUE".
             var romFiles = Directory.EnumerateFiles(romFolder, "*", SearchOption.AllDirectories)
-                .Where(f => RomExtensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase));
+                .Where(f => RomExtensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase))
+                .Where(f => !f.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) || ZipGameExtractor.ContainsGame(f));
 
             foreach (var rom in romFiles)
             {
