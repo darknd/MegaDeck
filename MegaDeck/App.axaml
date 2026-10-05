@@ -1,0 +1,70 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MegaDeck.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Resources>
+        <!-- Colores principales -->
+        <SolidColorBrush x:Key="PrimaryColor" Color="#1E1E2F"/>
+        <SolidColorBrush x:Key="SecondaryColor" Color="#2D2D3C"/>
+        <SolidColorBrush x:Key="SidebarColor" Color="#222222"/>
+        <SolidColorBrush x:Key="ItemBackground" Color="#2D2D3C"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#FF4081"/>
+        <SolidColorBrush x:Key="ButtonHoverColor" Color="#FF5C91"/>
+        <SolidColorBrush x:Key="TextColor" Color="White"/>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme/>
+
+        <!-- Botones de la barra lateral principal -->
+        <Style Selector="Button.sidebar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5,2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.sidebar:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource ButtonHoverColor}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+        </Style>
+
+        <!-- Lista de sistemas de la biblioteca -->
+        <Style Selector="ListBox.systems">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="ListBox.systems ListBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5,2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="ListBox.systems ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource ButtonHoverColor}"/>
+        </Style>
+        <Style Selector="ListBox.systems ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource AccentColor}"/>
+        </Style>
+
+        <!-- Tarjetas de juego -->
+        <Style Selector="Border.game">
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Background" Value="{StaticResource ItemBackground}"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.game:pointerover">
+            <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+        </Style>
+    </Application.Styles>
+</Application>

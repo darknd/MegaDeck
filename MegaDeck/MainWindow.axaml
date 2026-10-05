@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MegaDeck.MainWindow"
+        Title="MegaDeck - DaRKND 2026 - Version 0.3"
+        Icon="/megadeck.ico"
+        Width="1000" Height="600"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PrimaryColor}">
+
+    <DockPanel LastChildFill="True">
+        <!-- Barra lateral izquierda -->
+        <StackPanel DockPanel.Dock="Left" Width="180" Background="{StaticResource SecondaryColor}">
+            <TextBlock Text="MegaDeck" Foreground="{StaticResource AccentColor}" FontSize="24" FontWeight="Bold" Margin="10" HorizontalAlignment="Center"/>
+            <Button Content="Library" Classes="sidebar" Click="GoToLibrary"/>
+            <Button Content="Settings" Classes="sidebar" Click="GoToSettings"/>
+            <Button Content="Exit" Classes="sidebar" Click="Exit_Click"/>
+        </StackPanel>
+
+        <!-- Área de contenido dinámico -->
+        <ContentControl x:Name="MainContent"/>
+    </DockPanel>
+</Window>

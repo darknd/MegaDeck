@@ -1,60 +1,62 @@
-﻿using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
 
 namespace MegaDeck
 {
+    /// <summary>Mapa nombre de ROM (.cue/.chd) → archivo de portada dentro de images/.</summary>
     public static class RomImageManager
     {
-        private static readonly string MapPath = "rom_image_map.json";
-        private static Dictionary<string, string> _map;
+        private static Dictionary<string, string> _map = Load();
 
-        static RomImageManager()
+        private static Dictionary<string, string> Load()
         {
-            Load();
-        }
-
-        private static void Load()
-        {
-            if (File.Exists(MapPath))
+            if (File.Exists(AppPaths.ImageMapFile))
             {
-                var json = File.ReadAllText(MapPath);
-                _map = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
+                try
+                {
+                    var json = File.ReadAllText(AppPaths.ImageMapFile);
+                    return JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
+                }
+                catch (JsonException)
+                {
+                }
             }
-            else
-            {
-                _map = new Dictionary<string, string>();
-            }
+            return new Dictionary<string, string>();
         }
 
         public static void Save()
         {
             var json = JsonSerializer.Serialize(_map, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(MapPath, json);
+            File.WriteAllText(AppPaths.ImageMapFile, json);
         }
 
-        public static void SetImage(string cueFileName, string imageFileName)
+        /// <summary>
+        /// Copia la imagen a images/ con el nombre de la ROM (evita choques entre
+        /// portadas que se llamen igual, p. ej. "cover.jpg") y la asigna.
+        /// </summary>
+        public static void AssignCover(string romFileName, string sourceImagePath)
         {
-            _map[cueFileName] = imageFileName;
+            Directory.CreateDirectory(AppPaths.ImagesDir);
+            string imageFileName = Path.GetFileNameWithoutExtension(romFileName) + Path.GetExtension(sourceImagePath).ToLowerInvariant();
+            File.Copy(sourceImagePath, Path.Combine(AppPaths.ImagesDir, imageFileName), true);
+
+            _map[romFileName] = imageFileName;
             Save();
         }
 
-        public static string? GetImage(string cueFileName)
+        /// <summary>Ruta absoluta de la portada, o null si no hay o el archivo ya no existe.</summary>
+        public static string? GetImagePath(string romFileName)
         {
-            if (_map.TryGetValue(cueFileName, out var image))
-                return image;
+            if (!_map.TryGetValue(romFileName, out var image))
+                return null;
 
-            return null;
+            string path = Path.Combine(AppPaths.ImagesDir, image);
+            return File.Exists(path) ? path : null;
         }
 
-        public static void RemoveImage(string cueFileName)
+        public static void RemoveImage(string romFileName)
         {
-            if (_map.ContainsKey(cueFileName))
-            {
-                _map.Remove(cueFileName);
+            if (_map.Remove(romFileName))
                 Save();
-            }
         }
-
     }
 }

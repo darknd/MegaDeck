@@ -1,28 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Permite ejecutar el build framework-dependent con un runtime más nuevo (.NET 9, 10...) -->
+    <RollForward>Major</RollForward>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-    <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>megadeck.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
   </PropertyGroup>
 
-  <!-- 🔽 Copia automática de las carpetas engine y roms -->
   <ItemGroup>
-    <None Include=".\engine\**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include=".\roms\**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="Avalonia" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.22" />
   </ItemGroup>
 
-  <!-- 🔽 Referencia explícita a Windows Forms -->
   <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
+    <AvaloniaResource Include="megadeck.ico" />
+  </ItemGroup>
+
+  <!-- 🔽 Copia automática de RetroArch (Windows y Linux) y roms -->
+  <ItemGroup>
+    <None Include="engine/**/*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="engine-linux/**/*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="roms/**/*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -1,18 +1,22 @@
-using System.IO;
 using System.Text.Json;
 
 namespace MegaDeck
 {
     public static class ConfigManager
     {
-        private static string ConfigPath => "config.json";
-
         public static AppConfig LoadConfig()
         {
-            if (File.Exists(ConfigPath))
+            if (File.Exists(AppPaths.ConfigFile))
             {
-                string json = File.ReadAllText(ConfigPath);
-                return JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                try
+                {
+                    string json = File.ReadAllText(AppPaths.ConfigFile);
+                    return JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                }
+                catch (JsonException)
+                {
+                    return new AppConfig();
+                }
             }
             return new AppConfig();
         }
@@ -20,7 +24,7 @@ namespace MegaDeck
         public static void SaveConfig(AppConfig config)
         {
             string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(ConfigPath, json);
+            File.WriteAllText(AppPaths.ConfigFile, json);
         }
     }
 }

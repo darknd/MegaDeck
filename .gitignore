@@ -1,5 +1,6 @@
 # Build results
 bin/
+!MegaDeck/engine-linux/bin/
 obj/
 
 # User-specific files
