@@ -50,3 +50,7 @@ publish/
 
 # Crash dumps
 *.dmp
+
+# Historial y tiempos de juego de RetroArch (rutas y datos personales)
+*.lpl
+*.lrtl
